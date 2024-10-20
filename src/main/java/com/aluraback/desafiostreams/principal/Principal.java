@@ -6,8 +6,10 @@ import com.aluraback.desafiostreams.services.ConsumoAPI;
 import com.aluraback.desafiostreams.services.ConvierteDatos;
 
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
     private ConsumoAPI peticionApi = new ConsumoAPI();
@@ -21,11 +23,11 @@ public class Principal {
         var datos = convertir.obtenerDatos(json, Datos.class);
         //System.out.println(datos);
 
-        //TOP 10 libros más descargados
-        System.out.println("TOP 10 libros más descargados");
+        //TOP 20 libros más descargados
+        System.out.println("TOP 20 libros más descargados");
         datos.listaDeLibros().stream()
                 .sorted(Comparator.comparing(DatosLibros::numeroDeDescargas).reversed())
-                .limit(10)
+                .limit(20)
                 .map(l -> l.titulo().toUpperCase())
                 .forEach(System.out::println);
 
@@ -43,6 +45,16 @@ public class Principal {
         } else {
             System.out.println("Libro no encontrado");
         }
+
+        //Estadísticas sobre los libros
+        System.out.println("Algunas estadísticas de descargas");
+        DoubleSummaryStatistics estadisticas = datosBusqueda.listaDeLibros().stream()
+                .filter(l -> l.numeroDeDescargas() > 0)
+                .collect(Collectors.summarizingDouble(DatosLibros::numeroDeDescargas));
+        System.out.println("cantidad media de descargas: " + estadisticas.getAverage());
+        System.out.println("cantidad máxima de descargas: " + estadisticas.getMax());
+        System.out.println("cantidad mínima de descargas: " + estadisticas.getMin());
+        System.out.println("cantidad de registros evaluados para calcular estadísticas " + estadisticas.getCount());
     }
 
 }
